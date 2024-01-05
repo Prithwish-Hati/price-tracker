@@ -62,7 +62,7 @@ export const scrapeAmazonProduct = async (url: string) => {
       $("#landingImage").attr("data-a-dynamic-image") ||
       "{}";
 
-    // Parse the image object
+    // Parse the images object
     const imageUrls = Object.keys(JSON.parse(images));
 
     const currency = extractCurrency($(".a-price-symbol"));
