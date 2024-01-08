@@ -1,5 +1,6 @@
 import PriceInfoCard from "@/components/PriceInfoCard";
-import { getProductById } from "@/lib/actions";
+import ProductCard from "@/components/ProductCard";
+import { getProductById, getSimilarProducts } from "@/lib/actions";
 import { formatNumber } from "@/lib/utils";
 import { Product } from "@/types";
 import Image from "next/image";
@@ -9,7 +10,8 @@ import { redirect } from "next/navigation";
 const ProductPage = async ({ params }: { params: { id: string } }) => {
   const product: Product = await getProductById(params.id);
   if (!product) redirect("/");
-  console.log(product.reviewsCount);
+
+  const similarProducts = await getSimilarProducts(params.id);
 
   return (
     <div className="flex flex-col gap-16 flex-wrap px-6 md:px-20 py-24">
@@ -73,7 +75,6 @@ const ProductPage = async ({ params }: { params: { id: string } }) => {
               </div>
             </div>
           </div>
-
           <div className="flex items-center flex-wrap gap-10 py-6 border-y border-y-[#E4E4E4]">
             <div className="flex flex-col gap-2">
               <p className="text-[34px] text-secondary font-bold">
@@ -118,7 +119,6 @@ const ProductPage = async ({ params }: { params: { id: string } }) => {
               </p>
             </div>
           </div>
-
           <div className="my-7 flex flex-col gap-5">
             <div className="flex gap-5 flex-wrap">
               <PriceInfoCard
@@ -151,17 +151,35 @@ const ProductPage = async ({ params }: { params: { id: string } }) => {
               />
             </div>
           </div>
-
           Modal
         </div>
       </div>
 
-      <div className="flex flex-col gap-16 border-2 border-red-500">
+      <div className="flex flex-col gap-16 border-2">
         <button className="btn w-fit mx-auto flex items-center justify-center gap-3 min-w-[200px]">
-          <Image src="/assets/icons/bag.svg" alt="check" width={22} height={22} />
-          <Link href="/" className="text-base text-white">Buy Now</Link>
+          <Image
+            src="/assets/icons/bag.svg"
+            alt="check"
+            width={22}
+            height={22}
+          />
+          <Link href="/" className="text-base text-white">
+            Buy Now
+          </Link>
         </button>
       </div>
+
+      {similarProducts && similarProducts?.length > 0 && (
+        <div className="py-14 flex flex-col gap-2 w-full">
+          <p className="section-text">Similar Products</p>
+
+          <div className="flex flex-wrap gap-10 mt-7 w-full">
+            {similarProducts.map((product) => (
+              <ProductCard key={product._id} product={product} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
