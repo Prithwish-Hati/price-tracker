@@ -1,4 +1,6 @@
-import { PriceHistoryItem } from "@/types";
+import { PriceHistoryItem, Product } from "@/types";
+import { Notification } from "./nodemailer";
+import { THRESHOLD_PERCENTAGE } from "./nodemailer";
 
 // Extracts and returns the price from a list of possible elements.
 export function extractPrice(...elements: any) {
@@ -63,4 +65,23 @@ export const formatNumber = (num: number = 0) => {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   });
+};
+
+export const getEmailNotifType = (
+  scrapedProduct: Product,
+  currentProduct: Product
+) => {
+  const lowestPrice = getLowestPrice(currentProduct.priceHistory);
+
+  if (scrapedProduct.currentPrice < lowestPrice) {
+    return Notification.LOWEST_PRICE as keyof typeof Notification;
+  }
+  if (!scrapedProduct.isOutOfStock && currentProduct.isOutOfStock) {
+    return Notification.CHANGE_OF_STOCK as keyof typeof Notification;
+  }
+  if (scrapedProduct.discountRate >= THRESHOLD_PERCENTAGE) {
+    return Notification.THRESHOLD_MET as keyof typeof Notification;
+  }
+
+  return null;
 };
