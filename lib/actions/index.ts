@@ -7,6 +7,7 @@ import { scrapeAmazonProduct } from "../scraper";
 import { getAveragePrice, getHighestPrice, getLowestPrice } from "../utils";
 import { User } from "@/types";
 import { generateEmailBody, sendEmail } from "../nodemailer";
+import { redirect } from "next/navigation";
 
 export const scrapeAndStoreProduct = async (productUrl: string) => {
   if (!productUrl) return;
@@ -42,7 +43,7 @@ export const scrapeAndStoreProduct = async (productUrl: string) => {
       { upsert: true, new: true }
     );
 
-    revalidatePath(`/products/${newProduct._id}`);
+    revalidatePath(`/product/${newProduct._id}`);
   } catch (error: any) {
     throw new Error(`Failed to create/update product: ${error.message}`);
   }
@@ -89,15 +90,20 @@ export const getSimilarProducts = async (productId: string) => {
   }
 };
 
-export async function addUserEmailToProduct(productId: string, userEmail: string) {
+export async function addUserEmailToProduct(
+  productId: string,
+  userEmail: string
+) {
   try {
     const product = await Product.findById(productId);
 
-    if(!product) return;
+    if (!product) return;
 
-    const userExists = product.users.some((user: User) => user.email === userEmail);
+    const userExists = product.users.some(
+      (user: User) => user.email === userEmail
+    );
 
-    if(!userExists) {
+    if (!userExists) {
       product.users.push({ email: userEmail });
 
       await product.save();
